@@ -25,19 +25,45 @@ window.onload = function() {
 					_enemyBullets: [],//敌机子弹
 					_plane: null,//我方飞机
 					_planeBullets: [],//我房子弹
+					_gameLayer: null,
+					_hitCount: 0,
 					updateGame: function() {
+						//我方子弹打中敌方飞机，敌方飞机和子弹消失
+						var planeRect = this._plane.getBoundingBox();
+						var _this = this;
+						this._planeBullets.forEach(function(bullect) {
+							var bulletRect = bullect.getBoundingBox();
+							_this._enemies.forEach(function(enemy) {
+								var enemyRect = enemy.getBoundingBox();
+								if (cc.rectIntersectsRect(bulletRect, enemyRect)) {
+									//移除敌方飞机和子弹
+									_this._hitCount++;
+									var enemyName = enemy.getTag();
+									_this._enemies.splice(_this._enemies.indexOf(enemy), 1);
+									_this._gameLayer.removeChild(enemy);
+									_this._enemyBullets.forEach(function(enemyBullet) {
+										if (enemyBullet.getTag().indexOf(enemyName) !== -1) {
+											_this._enemyBullets.splice(_this._enemyBullets.indexOf(enemyBullet), 1);
+											_this._gameLayer.removeChild(enemyBullet);
+										}
+									})
+								}
+							});
+						});
+						console.log(_this._hitCount);
+						//敌方子弹打中我方飞机
 					},
 					onEnter: function() {
 						this._super();
 						var gameOver = false;
 						var _this = this;
 						//游戏层
-						var gameLayer = new GameLayer();
-						gameLayer.init();
-						this.addChild(gameLayer);
+						_this._gameLayer = new GameLayer();
+						_this._gameLayer.init();
+						this.addChild(_this._gameLayer);
 						//添加飞机
 						this._plane = new PlaneSprite();
-						gameLayer.addChild(this._plane);
+						_this._gameLayer.addChild(this._plane);
 						//子弹
 						var fireBullet = function() {
 							//cc.log('fireBullet');
@@ -50,10 +76,12 @@ window.onload = function() {
 							bullet.schedule(function() {
 								this.setPosition(this.getPosition().x, this.getPosition().y + planeBulletSpeed);
 								if (this.getPosition().x < 0 || this.getPosition().x > 320 - 5 / 2 || this.getPosition().y > 504) {
-									gameLayer.removeChild(this);
+									_this._planeBullets.splice(_this._planeBullets.indexOf(this), 1);
+									_this._gameLayer.removeChild(this);
 								}
 							}, 0, null, 0);
-							gameLayer.addChild(bullet);
+							_this._gameLayer.addChild(bullet);
+							_this._planeBullets.push(bullet);
 						};
 						this.schedule(fireBullet, 0.3, null, 0);
 						//敌机
@@ -71,7 +99,7 @@ window.onload = function() {
 								this.setPosition(this.getPosition().x, this.getPosition().y - enemyPlaneSpeed);
 								if (this.getPosition().x < 0 || this.getPosition().x > 320 - 5 / 2 || this.getPosition().y < 0) {
 									_this._enemies.splice(_this._enemies.indexOf(this), 1);
-									gameLayer.removeChild(this);
+									_this._gameLayer.removeChild(this);
 								}
 							}, 0, null, 0);
 							//敌机生成子弹
@@ -84,14 +112,14 @@ window.onload = function() {
 									bullet.setPosition(bullet.getPosition().x, bullet.getPosition().y - bulletSpeed);
 									if (bullet.getPosition().x < 0 || bullet.getPosition().x > 320 - 5 / 2 || bullet.getPosition().y > 504 || bullet.getPosition().y < 0) {
 										_this._enemyBullets.splice(_this._enemyBullets.indexOf(bullet), 1);
-										gameLayer.removeChild(bullet);
+										_this._gameLayer.removeChild(bullet);
 									}
 								}, 0, null, 0);
-								gameLayer.addChild(bullet);
+								_this._gameLayer.addChild(bullet);
 								bullet.setTag('enemybullet-' + enemyPlane.getTag());
 								_this._enemyBullets.push(bullet);
-							}, 4, null, 0);
-							gameLayer.addChild(enemyPlane);
+							}, 1, null, 0);
+							_this._gameLayer.addChild(enemyPlane);
 							_this._enemies.push(enemyPlane);
 						};
 						this.schedule(enemyPlaneAction, 2, null, 0);
@@ -121,7 +149,6 @@ window.onload = function() {
 				 * @type {void|*}
 				 */
 				var PlaneSprite = cc.Sprite.extend({
-					isAlive: true,
 					ctor: function() {
 						this._super();
 						var size = cc.director.getWinSize();
@@ -134,11 +161,11 @@ window.onload = function() {
 							event: cc.EventListener.TOUCH_ONE_BY_ONE,
 							swallowTouches: true,
 							onTouchBegan: function(touch, event) {
-								cc.log('on touch began');
+								//cc.log('on touch began');
 								return true;
 							},
 							onTouchMoved: function(touch, event) {
-								cc.log('on touch move');
+								//cc.log('on touch move');
 								var point = touch.getLocation();
 								//边界监测
 								if (point.x > size.width - 102) {
@@ -175,8 +202,7 @@ window.onload = function() {
 						this._super();
 						this.initWithFile('res/enemy1.png');
 						this.setAnchorPoint(0, 0);
-					},
-					isAlive: true
+					}
 				});
 				/**
 				 * 敌机子弹
