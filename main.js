@@ -42,12 +42,12 @@ window.onload = function() {
 									var enemyName = enemy.getTag();
 									_this._enemies.splice(_this._enemies.indexOf(enemy), 1);
 									_this._gameLayer.removeChild(enemy);
-									_this._enemyBullets.forEach(function(enemyBullet) {
-										if (enemyBullet.getTag().indexOf(enemyName) !== -1) {
-											_this._enemyBullets.splice(_this._enemyBullets.indexOf(enemyBullet), 1);
-											_this._gameLayer.removeChild(enemyBullet);
-										}
-									});
+									//_this._enemyBullets.forEach(function(enemyBullet) {
+									//	if (enemyBullet.getTag().indexOf(enemyName) !== -1) {
+									//		_this._enemyBullets.splice(_this._enemyBullets.indexOf(enemyBullet), 1);
+									//		_this._gameLayer.removeChild(enemyBullet);
+									//	}
+									//});
 								}
 							});
 						});
@@ -97,7 +97,7 @@ window.onload = function() {
 							}
 							var bullet = new PlaneBulletSprite();
 							var planeBulletSpeed = 2;
-							bullet.setPosition(_this._plane.getPosition().x + 51, 126 + 15);
+							bullet.setPosition(_this._plane.getPosition().x, 126 + 15);
 							bullet.schedule(function() {
 								this.setPosition(this.getPosition().x, this.getPosition().y + planeBulletSpeed);
 								if (this.getPosition().x < 0 || this.getPosition().x > 320 - 5 / 2 || this.getPosition().y > 504) {
@@ -197,8 +197,8 @@ window.onload = function() {
 						this._super();
 						var size = cc.director.getWinSize();
 						this.initWithFile('res/hero1.png');
-						this.setAnchorPoint(0, 0);
-						this.setPosition(size.width / 2 - 51, 0);
+						//this.setAnchorPoint(0, 0);
+						this.setPosition(size.width / 2, 63);
 						var _this = this;
 						//注册事件
 						var listener = cc.EventListener.create({
@@ -212,11 +212,11 @@ window.onload = function() {
 								//cc.log('on touch move');
 								var point = touch.getLocation();
 								//边界监测
-								if (point.x > size.width - 102) {
-									point.x = size.width - 102;
+								if (point.x > size.width - 102 / 2) {
+									point.x = size.width - 102 / 2;
 								}
-								if (point.x < 0) {
-									point.x = 0;
+								if (point.x <= 61) {
+									point.x = 61;
 								}
 								_this.setPositionX(point.x);
 							},
