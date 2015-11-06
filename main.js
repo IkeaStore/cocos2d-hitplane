@@ -21,25 +21,32 @@ window.onload = function() {
 				 * @type {void|*}
 				 */
 				var GameScene = cc.Scene.extend({
+					_enemies: [],//敌机列表
+					_enemyBullets: [],//敌机子弹
+					_plane: null,//我方飞机
+					_planeBullets: [],//我房子弹
+					updateGame: function() {
+					},
 					onEnter: function() {
 						this._super();
 						var gameOver = false;
+						var _this = this;
 						//游戏层
 						var gameLayer = new GameLayer();
 						gameLayer.init();
 						this.addChild(gameLayer);
 						//添加飞机
-						var plane = new PlaneSprite();
-						gameLayer.addChild(plane);
+						this._plane = new PlaneSprite();
+						gameLayer.addChild(this._plane);
 						//子弹
 						var fireBullet = function() {
-							cc.log('fireBullet');
+							//cc.log('fireBullet');
 							if (gameOver) {
 								return;
 							}
 							var bullet = new PlaneBulletSprite();
 							var planeBulletSpeed = 2;
-							bullet.setPosition(plane.getPosition().x + 51, 126 + 15);
+							bullet.setPosition(_this._plane.getPosition().x + 51, 126 + 15);
 							bullet.schedule(function() {
 								this.setPosition(this.getPosition().x, this.getPosition().y + planeBulletSpeed);
 								if (this.getPosition().x < 0 || this.getPosition().x > 320 - 5 / 2 || this.getPosition().y > 504) {
@@ -51,17 +58,19 @@ window.onload = function() {
 						this.schedule(fireBullet, 0.3, null, 0);
 						//敌机
 						var enemyPlaneAction = function() {
-							cc.log('enemyPlane');
+							//cc.log('enemyPlane');
 							if (gameOver) {
 								return;
 							}
 							var enemyPlane = new EnemyPlaneSprite();
 							var enemyPlaneSpeed = 1;
 							var originX = Math.random();
+							enemyPlane.setTag('enemy-' + Math.random());
 							enemyPlane.setPosition(originX * 320, 480);
 							enemyPlane.schedule(function() {
 								this.setPosition(this.getPosition().x, this.getPosition().y - enemyPlaneSpeed);
 								if (this.getPosition().x < 0 || this.getPosition().x > 320 - 5 / 2 || this.getPosition().y < 0) {
+									_this._enemies.splice(_this._enemies.indexOf(this), 1);
 									gameLayer.removeChild(this);
 								}
 							}, 0, null, 0);
@@ -73,15 +82,21 @@ window.onload = function() {
 								//敌机子弹动作
 								bullet.schedule(function() {
 									bullet.setPosition(bullet.getPosition().x, bullet.getPosition().y - bulletSpeed);
-									if (bullet.getPosition().x < 0 || bullet.getPosition().x > 320 - 5 / 2 || bullet.getPosition().y > 504) {
+									if (bullet.getPosition().x < 0 || bullet.getPosition().x > 320 - 5 / 2 || bullet.getPosition().y > 504 || bullet.getPosition().y < 0) {
+										_this._enemyBullets.splice(_this._enemyBullets.indexOf(bullet), 1);
 										gameLayer.removeChild(bullet);
 									}
 								}, 0, null, 0);
 								gameLayer.addChild(bullet);
-							}, 2, null, 0);
+								bullet.setTag('enemybullet-' + enemyPlane.getTag());
+								_this._enemyBullets.push(bullet);
+							}, 4, null, 0);
 							gameLayer.addChild(enemyPlane);
+							_this._enemies.push(enemyPlane);
 						};
-						this.schedule(enemyPlaneAction, 1, null, 0);
+						this.schedule(enemyPlaneAction, 2, null, 0);
+						// 更新游戏
+						this.schedule(this.updateGame);
 					}
 				});
 				/**
