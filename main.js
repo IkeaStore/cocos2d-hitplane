@@ -65,9 +65,9 @@ window.onload = function() {
 							}
 						});
 						//敌方飞机撞上我方飞机，游戏结束
-						this._enemies.forEach(function(enemy,enemyIndex) {
+						this._enemies.forEach(function(enemy, enemyIndex) {
 							var enemyRect = enemy.getBoundingBox();
-							if(cc.rectIntersectsRect(planeRect,enemyRect)){
+							if (cc.rectIntersectsRect(planeRect, enemyRect)) {
 								_this.lift = 0;
 								cc.log('game over');
 								// 移除飞机
@@ -75,6 +75,8 @@ window.onload = function() {
 								_this._gameLayer.removeChild(enemy);
 							}
 						});
+						_this._gameLayer.setHit(_this._hitCount);
+						_this._gameLayer.setLife(_this.life);
 					},
 					onEnter: function() {
 						this._super();
@@ -155,16 +157,35 @@ window.onload = function() {
 				 * @type {void|*}
 				 */
 				var GameLayer = cc.Layer.extend({
+					_lifeLabel: null,
+					_hitLabel: null,
 					init: function() {
 						this._super();
+						var size = cc.director.getWinSize();
 						var layer = cc.Layer.create();
 						//添加背景
 						var bg = cc.Sprite.create('res/background.png');
 						bg.setAnchorPoint(0, 0);
 						bg.setPosition(0, 0);
 						layer.addChild(bg);
+						//敌机浮层
+						this._lifeLabel = cc.LabelTTF.create('life: 10', 'Arial', 16, null, cc.TEXT_ALIGNMENT_RIGHT, cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM);
+						this._lifeLabel.setPosition(size.width - 10, size.height - 30);
+						this._lifeLabel.setAnchorPoint(1, 0);
+						layer.addChild(this._lifeLabel);
+						//生命浮层
+						this._hitLabel = cc.LabelTTF.create('hit: 0', 'Arial', 16, null, cc.TEXT_ALIGNMENT_RIGHT, cc.VERTICAL_TEXT_ALIGNMENT_BOTTOM);
+						this._hitLabel.setPosition(size.width - 10, size.height - 50);
+						this._hitLabel.setAnchorPoint(1, 0);
+						layer.addChild(this._hitLabel);
 						this.addChild(layer);
 						return true;
+					},
+					setHit: function(number) {
+						this._hitLabel.setString('hit: ' + number);
+					},
+					setLife: function(number) {
+						this._lifeLabel.setString('life: ' + number);
 					}
 				});
 				/**
