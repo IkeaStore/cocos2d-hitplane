@@ -27,6 +27,7 @@ window.onload = function() {
 					_planeBullets: [],//我房子弹
 					_gameLayer: null,
 					_hitCount: 0,
+					life: 10,
 					updateGame: function() {
 						//我方子弹打中敌方飞机，敌方飞机和子弹消失
 						var planeRect = this._plane.getBoundingBox();
@@ -46,12 +47,34 @@ window.onload = function() {
 											_this._enemyBullets.splice(_this._enemyBullets.indexOf(enemyBullet), 1);
 											_this._gameLayer.removeChild(enemyBullet);
 										}
-									})
+									});
 								}
 							});
 						});
-						console.log(_this._hitCount);
-						//敌方子弹打中我方飞机
+						//敌方子弹打中我方飞机，10次
+						this._enemyBullets.forEach(function(enemyBullet, enemyBulletIndex) {
+							var bulletRect = enemyBullet.getBoundingBox();
+							if (cc.rectIntersectsRect(bulletRect, planeRect)) {
+								_this.life--;
+								if (_this.life <= 0) {
+									cc.log('game over');
+								}
+								// 移除子弹
+								_this._enemyBullets.splice(enemyBulletIndex, 1);
+								_this._gameLayer.removeChild(enemyBullet);
+							}
+						});
+						//敌方飞机撞上我方飞机，游戏结束
+						this._enemies.forEach(function(enemy,enemyIndex) {
+							var enemyRect = enemy.getBoundingBox();
+							if(cc.rectIntersectsRect(planeRect,enemyRect)){
+								_this.lift = 0;
+								cc.log('game over');
+								// 移除飞机
+								_this._enemyBullets.splice(enemyIndex, 1);
+								_this._gameLayer.removeChild(enemy);
+							}
+						});
 					},
 					onEnter: function() {
 						this._super();
