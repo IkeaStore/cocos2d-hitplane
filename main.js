@@ -12,7 +12,8 @@ window.onload = function() {
 				'res/background.png',
 				'res/hero1.png',
 				'res/bullet1.png',
-				'res/enemy1.png'
+				'res/enemy1.png',
+				'res/bullet2.png'
 			]
 			, function() {
 				/**
@@ -47,14 +48,15 @@ window.onload = function() {
 							}, 0, null, 0);
 							gameLayer.addChild(bullet);
 						};
-						this.schedule(fireBullet, 0.3, cc.REPEAT_FOREVER, 0);
+						this.schedule(fireBullet, 0.3, null, 0);
+						//敌机
 						var enemyPlaneAction = function() {
 							cc.log('enemyPlane');
 							if (gameOver) {
 								return;
 							}
 							var enemyPlane = new EnemyPlaneSprite();
-							var enemyPlaneSpeed = 2;
+							var enemyPlaneSpeed = 1;
 							var originX = Math.random();
 							enemyPlane.setPosition(originX * 320, 480);
 							enemyPlane.schedule(function() {
@@ -63,9 +65,23 @@ window.onload = function() {
 									gameLayer.removeChild(this);
 								}
 							}, 0, null, 0);
+							//敌机生成子弹
+							enemyPlane.schedule(function() {
+								var bullet = new EnemyPlaneBulletSprite();
+								var bulletSpeed = 2;
+								bullet.setPosition(this.getPosition().x + 57 / 2, this.getPosition().y);
+								//敌机子弹动作
+								bullet.schedule(function() {
+									bullet.setPosition(bullet.getPosition().x, bullet.getPosition().y - bulletSpeed);
+									if (bullet.getPosition().x < 0 || bullet.getPosition().x > 320 - 5 / 2 || bullet.getPosition().y > 504) {
+										gameLayer.removeChild(bullet);
+									}
+								}, 0, null, 0);
+								gameLayer.addChild(bullet);
+							}, 2, null, 0);
 							gameLayer.addChild(enemyPlane);
 						};
-						this.schedule(enemyPlaneAction, 1, cc.REPEAT_FOREVER, 0);
+						this.schedule(enemyPlaneAction, 1, null, 0);
 					}
 				});
 				/**
@@ -90,6 +106,7 @@ window.onload = function() {
 				 * @type {void|*}
 				 */
 				var PlaneSprite = cc.Sprite.extend({
+					isAlive: true,
 					ctor: function() {
 						this._super();
 						var size = cc.director.getWinSize();
@@ -142,6 +159,18 @@ window.onload = function() {
 					ctor: function() {
 						this._super();
 						this.initWithFile('res/enemy1.png');
+						this.setAnchorPoint(0, 0);
+					},
+					isAlive: true
+				});
+				/**
+				 * 敌机子弹
+				 * @type {void|*}
+				 */
+				var EnemyPlaneBulletSprite = cc.Sprite.extend({
+					ctor: function() {
+						this._super();
+						this.initWithFile('res/bullet2.png');
 					}
 				});
 				cc.director.runScene(new GameScene);
