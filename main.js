@@ -11,7 +11,8 @@ window.onload = function() {
 			[
 				'res/background.png',
 				'res/hero1.png',
-				'res/bullet1.png'
+				'res/bullet1.png',
+				'res/enemy1.png'
 			]
 			, function() {
 				/**
@@ -47,6 +48,24 @@ window.onload = function() {
 							gameLayer.addChild(bullet);
 						};
 						this.schedule(fireBullet, 0.3, cc.REPEAT_FOREVER, 0);
+						var enemyPlaneAction = function() {
+							cc.log('enemyPlane');
+							if (gameOver) {
+								return;
+							}
+							var enemyPlane = new EnemyPlaneSprite();
+							var enemyPlaneSpeed = 2;
+							var originX = Math.random();
+							enemyPlane.setPosition(originX * 320, 480);
+							enemyPlane.schedule(function() {
+								this.setPosition(this.getPosition().x, this.getPosition().y - enemyPlaneSpeed);
+								if (this.getPosition().x < 0 || this.getPosition().x > 320 - 5 / 2 || this.getPosition().y < 0) {
+									gameLayer.removeChild(this);
+								}
+							}, 0, null, 0);
+							gameLayer.addChild(enemyPlane);
+						};
+						this.schedule(enemyPlaneAction, 1, cc.REPEAT_FOREVER, 0);
 					}
 				});
 				/**
@@ -113,6 +132,16 @@ window.onload = function() {
 						this._super();
 						//var size = cc.director.getWinSize();
 						this.initWithFile('res/bullet1.png');
+					}
+				});
+				/**
+				 * 敌机
+				 * @type {void|*}
+				 */
+				var EnemyPlaneSprite = cc.Sprite.extend({
+					ctor: function() {
+						this._super();
+						this.initWithFile('res/enemy1.png');
 					}
 				});
 				cc.director.runScene(new GameScene);
