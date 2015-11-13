@@ -13,7 +13,10 @@ window.onload = function() {
 				'res/hero1.png',
 				'res/bullet1.png',
 				'res/enemy1.png',
-				'res/bullet2.png'
+				'res/bullet2.png',
+				'res/game_music.mp3',
+				'res/bullet.mp3',
+				'res/enemy1_down.mp3'
 			]
 			, function() {
 				/**
@@ -39,6 +42,7 @@ window.onload = function() {
 								if (cc.rectIntersectsRect(bulletRect, enemyRect)) {
 									//移除敌方飞机和子弹
 									_this._hitCount++;
+									cc.audioEngine.playEffect('res/enemy1_down.mp3');
 									var enemyName = enemy.getTag();
 									_this._enemies.splice(_this._enemies.indexOf(enemy), 1);
 									_this._gameLayer.removeChild(enemy);
@@ -86,6 +90,8 @@ window.onload = function() {
 						_this._gameLayer = new GameLayer();
 						_this._gameLayer.init();
 						this.addChild(_this._gameLayer);
+						// 音乐
+						cc.audioEngine.playMusic('res/game_music.mp3');
 						//添加飞机
 						this._plane = new PlaneSprite();
 						_this._gameLayer.addChild(this._plane);
@@ -107,6 +113,7 @@ window.onload = function() {
 							}, 0, null, 0);
 							_this._gameLayer.addChild(bullet);
 							_this._planeBullets.push(bullet);
+							cc.audioEngine.playEffect('res/bullet.mp3');
 						};
 						this.schedule(fireBullet, 0.3, null, 0);
 						//敌机
